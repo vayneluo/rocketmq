@@ -31,8 +31,20 @@ public interface MQProducer extends MQAdmin {
 
     void shutdown();
 
+    /***
+     * @description: 根据topic查询主题下的消息队列
+     * @param: [topic] 主题名称
+     * @author: Vayne.Luo
+     * @date: 2022/7/26 16:24
+     */
     List<MessageQueue> fetchPublishMessageQueues(final String topic) throws MQClientException;
 
+    /***
+     * @description: 同步发送消息
+     * @param: [msg] 消息
+     * @author: Vayne.Luo
+     * @date: 2022/7/26 16:24
+     */
     SendResult send(final Message msg) throws MQClientException, RemotingException, MQBrokerException,
         InterruptedException;
 
