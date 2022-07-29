@@ -84,6 +84,11 @@ import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.apache.rocketmq.remoting.netty.NettyClientConfig;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 
+/***
+ * @description: 客户端实例
+ * @author: Vayne.Luo
+ * @date: 2022/7/27 16:15
+ */
 public class MQClientInstance {
     private final static long LOCK_TIMEOUT_MILLIS = 3000;
     private final InternalLogger log = ClientLogger.getLog();
@@ -909,6 +914,12 @@ public class MQClientInstance {
         }
     }
 
+    /***
+     * @description: 注册生产者
+     * @param: [group, producer] 生产者组名， 生产者实例
+     * @author: Vayne.Luo
+     * @date: 2022/7/27 16:26
+     */ 
     public synchronized boolean registerProducer(final String group, final DefaultMQProducerImpl producer) {
         if (null == group || null == producer) {
             return false;

@@ -45,7 +45,9 @@ public class MQClientManager {
     }
 
     public MQClientInstance getOrCreateMQClientInstance(final ClientConfig clientConfig, RPCHook rpcHook) {
+        // 构建客户端id
         String clientId = clientConfig.buildMQClientId();
+        // 根据 client id获取客户端缓存Map中的client
         MQClientInstance instance = this.factoryTable.get(clientId);
         if (null == instance) {
             instance =

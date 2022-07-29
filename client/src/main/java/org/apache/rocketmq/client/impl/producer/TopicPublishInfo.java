@@ -24,10 +24,15 @@ import org.apache.rocketmq.common.protocol.route.QueueData;
 import org.apache.rocketmq.common.protocol.route.TopicRouteData;
 
 public class TopicPublishInfo {
+    // 是否是顺序消息
     private boolean orderTopic = false;
+    // 是否有topic路由信息
     private boolean haveTopicRouterInfo = false;
+    // 该topic的消息队列
     private List<MessageQueue> messageQueueList = new ArrayList<MessageQueue>();
+    // 消息队列选择累加器 每选择一次计数加 1
     private volatile ThreadLocalIndex sendWhichQueue = new ThreadLocalIndex();
+    // topic route meta data
     private TopicRouteData topicRouteData;
 
     public boolean isOrderTopic() {
@@ -67,9 +72,8 @@ public class TopicPublishInfo {
     }
 
     public MessageQueue selectOneMessageQueue(final String lastBrokerName) {
-        if (lastBrokerName == null) {
-            return selectOneMessageQueue();
-        } else {
+        // 上次消息发送失败了，需要规避重发失败
+        if (lastBrokerName != null) {
             for (int i = 0; i < this.messageQueueList.size(); i++) {
                 int index = this.sendWhichQueue.incrementAndGet();
                 int pos = Math.abs(index) % this.messageQueueList.size();
@@ -80,12 +84,14 @@ public class TopicPublishInfo {
                     return mq;
                 }
             }
-            return selectOneMessageQueue();
         }
+        // 选择一个消息队列
+        return selectOneMessageQueue();
     }
 
     public MessageQueue selectOneMessageQueue() {
         int index = this.sendWhichQueue.incrementAndGet();
+        // 与路由表中的消息队列个数取模，返回具体消息队列position
         int pos = Math.abs(index) % this.messageQueueList.size();
         if (pos < 0)
             pos = 0;

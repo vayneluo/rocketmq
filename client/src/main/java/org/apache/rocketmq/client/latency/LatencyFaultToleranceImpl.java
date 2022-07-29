@@ -37,6 +37,7 @@ public class LatencyFaultToleranceImpl implements LatencyFaultTolerance<String> 
             faultItem.setCurrentLatency(currentLatency);
             faultItem.setStartTimestamp(System.currentTimeMillis() + notAvailableDuration);
 
+            // 考虑并发的问题？ 同一个broker-name多次写入
             old = this.faultItemTable.putIfAbsent(name, faultItem);
             if (old != null) {
                 old.setCurrentLatency(currentLatency);
@@ -97,8 +98,14 @@ public class LatencyFaultToleranceImpl implements LatencyFaultTolerance<String> 
     }
 
     class FaultItem implements Comparable<FaultItem> {
+
+        // 失败条目
         private final String name;
+        // 本次消息发送延迟
         private volatile long currentLatency;
+        // 故障规避开始时间 取决于latencyMax计算出的latencyDuration
+        // 根据每次消息发送选择的队列延迟时间，计算出对应的规避时间（发送消息的当前时间 + duration），这个时间就是该broker下次可以使用的起始时间
+        // 注意volatile修饰，存在数据竞争
         private volatile long startTimestamp;
 
         public FaultItem(final String name) {
@@ -130,6 +137,11 @@ public class LatencyFaultToleranceImpl implements LatencyFaultTolerance<String> 
             return 0;
         }
 
+        /***
+         * @description: 判断当前broker是否可用 系统时间是否大于broker可用起始时间
+         * @author: Vayne.Luo
+         * @date: 2022/7/29 13:35
+         */
         public boolean isAvailable() {
             return (System.currentTimeMillis() - startTimestamp) >= 0;
         }

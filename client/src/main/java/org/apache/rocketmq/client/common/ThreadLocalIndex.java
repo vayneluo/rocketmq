@@ -31,6 +31,7 @@ public class ThreadLocalIndex {
         }
 
         this.threadLocalIndex.set(++index);
+        // 取绝对值
         return Math.abs(index);
     }
 
